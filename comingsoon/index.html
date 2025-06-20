@@ -123,8 +123,8 @@
             }
 
             // Load header and footer
-            await loadComponent('header-placeholder', './header.html');
-            await loadComponent('footer-placeholder', './footer.html');
+            await loadComponent('header-placeholder', '../header/');
+            await loadComponent('footer-placeholder', '../footer/');
 
             // Initialize Mobile Menu (as this JS is now loaded after header content)
             // This entire block runs AFTER header.html is injected

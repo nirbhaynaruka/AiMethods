@@ -215,8 +215,8 @@
             }
 
             // Load header and footer
-            await loadComponent('header-placeholder', './headerfooter/header.html');
-            await loadComponent('footer-placeholder', './headerfooter/footer.html');
+            await loadComponent('header-placeholder', './header/');
+            await loadComponent('footer-placeholder', './footer/');
 
             // Initialize Mobile Menu (as this JS is now loaded after header content)
             const mobileMenuButton = document.getElementById('mobile-menu-button');
