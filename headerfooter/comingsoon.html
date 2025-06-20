@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMethods: Coming Soon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutral Tech -->
+    <!-- Application Structure Plan: This is a placeholder "Coming Soon" page. It incorporates the dynamically loaded global header and footer to maintain site-wide consistency. The main content is minimal, clearly communicating that content is forthcoming. -->
+    <!-- Visualization & Content Choices: Uses simple HTML and Tailwind. Primarily textual content. No complex interactive elements or LLM calls on this page. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #1a202c;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #EBF8FF; /* Light blue on hover for dark header */
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px; /* Fully rounded */
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .cta-button-primary {
+            background-color: #3B82F6; /* Blue-600 */
+            color: white;
+            border: 2px solid transparent;
+        }
+        .cta-button-primary:hover {
+            background-color: #2563EB; /* Blue-700 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 32, 44, 0.95); /* Dark overlay */
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-menu-overlay.open {
+            transform: translateX(0);
+        }
+        .mobile-menu-overlay a {
+            font-size: 1.8rem;
+            color: white;
+            padding: 1rem 0;
+            transition: color 0.2s ease;
+        }
+        .mobile-menu-overlay a:hover {
+            color: #3B82F6;
+        }
+        .close-button {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+        }
+        /* Hide content until header/footer are loaded to prevent FOUC */
+        #page-content {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #page-content.loaded {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="header-placeholder"></div>
+
+    <div id="page-content">
+        <main class="py-20 bg-gray-50 min-h-[calc(100vh-120px)] flex flex-col items-center justify-center text-center">
+            <div class="container mx-auto px-6 max-w-3xl">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Coming Soon!</h1>
+                <p class="text-lg text-gray-600 mb-8">We're hard at work creating something amazing for you. Stay tuned!</p>
+                <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="https://aimethods.co" class="cta-button cta-button-primary">Back to Homepage</a>
+                    <a href="https://aimethods.co/waitlist/" class="cta-button cta-button-secondary">Join Our Waitlist</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div id="footer-placeholder"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Function to load and inject HTML content
+            async function loadComponent(placeholderId, filePath) {
+                try {
+                    const response = await fetch(filePath);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const html = await response.text();
+                    document.getElementById(placeholderId).innerHTML = html;
+                } catch (error) {
+                    console.error(`Could not load ${filePath}:`, error);
+                    document.getElementById(placeholderId).innerHTML = `<div class="text-red-500 text-center p-4">Error loading ${filePath}.</div>`;
+                }
+            }
+
+            // Load header and footer
+            await loadComponent('header-placeholder', './headerfooter/header.html');
+            await loadComponent('footer-placeholder', './headerfooter/footer.html');
+
+            // Initialize Mobile Menu (as this JS is now loaded after header content)
+            // This entire block runs AFTER header.html is injected
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+            const closeMobileMenu = document.getElementById('close-mobile-menu');
+
+            if (mobileMenuButton && mobileMenuOverlay && closeMobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenuOverlay.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                });
+
+                closeMobileMenu.addEventListener('click', () => {
+                    mobileMenuOverlay.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+
+                mobileMenuOverlay.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenuOverlay.classList.remove('open');
+                        document.body.style.overflow = '';
+                    });
+                });
+            } else {
+                console.warn("Mobile menu elements not found after header injection. Check header.html content.");
+            }
+            
+            // Show content after header/footer are loaded
+            document.getElementById('page-content').classList.add('loaded');
+        });
+    </script>
+</body>
+</html>

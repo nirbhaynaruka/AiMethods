@@ -1,0 +1,65 @@
+    <!-- Global Header -->
+    <header class="bg-gray-800 text-white sticky top-0 z-50 shadow-lg border-b border-gray-700">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="https://aimethods.co" class="text-2xl font-bold text-white hover:text-blue-300 transition-colors">AiMethods</a>
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex space-x-8">
+                <a href="https://aimethods.co" class="nav-link text-white">Home</a>
+                <a href="https://aimethods.co/products/" class="nav-link text-white">Products</a>
+                <a href="https://aimethods.co/contact/" class="nav-link text-white">Contact</a>
+            </div>
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-white focus:outline-none">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu-overlay" class="mobile-menu-overlay">
+        <button id="close-mobile-menu" class="close-button">&times;</button>
+        <nav class="flex flex-col items-center space-y-6">
+            <a href="https://aimethods.co" class="nav-link">Home</a>
+            <a href="https://aimethods.co/products/" class="nav-link">Products</a>
+            <a href="https://aimethods.co/contact/" class="nav-link">Contact</a>
+        </nav>
+    </div>
+
+    <!-- Mobile Menu JavaScript -->
+    <script>
+        // This script block should be placed at the end of the <body> or within the header content itself.
+        // It provides the functionality for the mobile menu.
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+            const closeMobileMenu = document.getElementById('close-mobile-menu');
+
+            // Open mobile menu
+            if (mobileMenuButton) { // Ensure button exists on page
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenuOverlay.classList.add('open');
+                    document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
+                });
+            }
+
+            // Close mobile menu
+            if (closeMobileMenu) { // Ensure close button exists
+                closeMobileMenu.addEventListener('click', () => {
+                    mobileMenuOverlay.classList.remove('open');
+                    document.body.style.overflow = ''; // Restore scrolling
+                });
+            }
+
+            // Close menu when a link is clicked
+            if (mobileMenuOverlay) { // Ensure overlay exists
+                mobileMenuOverlay.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenuOverlay.classList.remove('open');
+                        document.body.style.overflow = '';
+                    });
+                });
+            }
+        });
+    </script>
