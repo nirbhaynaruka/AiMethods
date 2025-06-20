@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMethods : Architecting Premium AI Prompts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutral Tech -->
+    <!-- Application Structure Plan: The SPA now features a distinct global header and footer, designed for site-wide consistency. The main content starts with a "Hero" section including a prominent CTA. The page-specific navigation (Value, Toolkit, Library, Strategy) is integrated as a sticky sub-navigation bar, ensuring easy access to content sections. The content flow is: "Value Proposition" (interactive checklist), "Prompt Architect's Toolkit" (interactive techniques), "Premium Prompt Library" (tabbed examples with CTA), "✨ Try a Premium Prompt ✨" (LLM-powered prompt generator), and "Market & Strategy" (visualized business case). The "Join Waitlist" buttons now direct users to a dedicated /waitlist page for systematic information gathering. -->
+    <!-- Visualization & Content Choices: Report Info: Market Growth -> Goal: Show change -> Viz: Bar Chart (Chart.js) for clear trend visualization. Report Info: Premium Prompt Checklist -> Goal: Compare/Inform -> Method: Interactive HTML list, where clicking reveals details, making it more engaging than a static table. Report Info: Advanced Techniques -> Goal: Organize/Inform -> Method: Two-panel layout with a clickable menu, allowing focused exploration of each technique. Report Info: Prompt Examples -> Goal: Inform/Organize -> Method: Tabbed interface to cleanly present large code/text blocks without clutter. New Feature: Prompt Generation -> Goal: Demonstrate value -> Method: Text input + LLM call + text output. All choices adhere to the NO SVG/Mermaid rule and support the non-linear application structure. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #1a202c;
+        }
+        .active-nav {
+            color: #3B82F6;
+            font-weight: 600;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #3B82F6;
+        }
+        .active-tab {
+            background-color: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .active-tech {
+             background-color: #EBF8FF;
+             color: #2C5282;
+             font-weight: 600;
+        }
+        .tech-btn:hover {
+            background-color: #F7FAFC;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+        }
+        .prompt-card {
+            display: none;
+        }
+        .prompt-card.active {
+            display: block;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px; /* Fully rounded */
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .cta-button-primary {
+            background-color: #3B82F6; /* Blue-600 */
+            color: white;
+            border: 2px solid transparent;
+        }
+        .cta-button-primary:hover {
+            background-color: #2563EB; /* Blue-700 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .cta-button-secondary {
+            background-color: transparent;
+            color: #3B82F6; /* Blue-600 */
+            border: 2px solid #3B82F6;
+        }
+        .cta-button-secondary:hover {
+            background-color: #DBEAFE; /* Blue-100 */
+            color: #2563EB;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Global Header -->
+    <header class="bg-gray-800 text-white sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="https://aimethods.co" class="text-2xl font-bold text-white hover:text-gray-300 transition-colors">AiMethods</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="https://aimethods.co/home" class="text-white hover:text-gray-300 transition-colors">Home</a>
+                <a href="https://aimethods.co/products" class="text-white hover:text-gray-300 transition-colors">Products</a>
+                <a href="https://aimethods.co/solutions" class="text-white hover:text-gray-300 transition-colors">Solutions</a>
+                <a href="https://aimethods.co/about" class="text-white hover:text-gray-300 transition-colors">About Us</a>
+                <a href="https://aimethods.co/contact" class="text-white hover:text-gray-300 transition-colors">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Product-Specific Navigation -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-[68px] z-40 shadow-sm border-b border-gray-200">
+        <div class="container mx-auto px-6 py-3 flex justify-center md:justify-start space-x-6 md:space-x-8 text-gray-700">
+            <a href="#hero" class="nav-link font-semibold text-blue-600">Prompts Overview</a>
+            <a href="#value" class="nav-link">Value</a>
+            <a href="#toolkit" class="nav-link">Toolkit</a>
+            <a href="#library" class="nav-link">Library</a>
+            <a href="#sparkle-prompt" class="nav-link">Sparkle Prompt</a>
+            <a href="#strategy" class="nav-link">Strategy</a>
+        </div>
+    </nav>
+
+    <main>
+        <section id="hero" class="py-20 md:py-32 text-center bg-white">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">Architecting Your Premium AI Prompts</h1>
+                <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">This is a preview of our premium, expert-crafted AI prompts. Moving beyond simple queries, our specialized prompt packages engineer high-value instructions that deliver unparalleled results for analysts, creators, and builders.</p>
+                <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="../waitlist/waitlist.html" class="cta-button cta-button-primary">Join Our Waitlist</a>
+                    <!-- <a href="https://aimethods.co/contact-form" target="_blank" class="cta-button cta-button-secondary">Learn More</a> -->
+                </div>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                        <p class="text-3xl font-bold text-blue-600" id="market-size-stat">$6,533.87B</p>
+                        <p class="mt-2 text-gray-600">Projected Prompt Engineering Market by 2034</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                        <p class="text-3xl font-bold text-blue-600" id="cagr-stat">32.90%</p>
+                        <p class="mt-2 text-gray-600">Compound Annual Growth Rate (CAGR)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="value" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Anatomy of a Premium Prompt</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">A premium prompt is not just an instruction; it's a meticulously engineered solution. It justifies its value by automating complex tasks, reducing errors, and delivering expert-level insights that save significant time and resources. Click each criterion to see how.</p>
+                </div>
+                <div id="value-checklist" class="max-w-4xl mx-auto space-y-4">
+                </div>
+            </div>
+        </section>
+
+        <section id="toolkit" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Prompt Architect's Toolkit</h2>
+                     <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Expert-level prompts are built using a combination of foundational principles and advanced techniques. This toolkit allows you to explore the methods that transform a simple query into a powerful, precise instruction for an AI model.</p>
+                </div>
+                <div class="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto bg-gray-50 p-4 rounded-lg shadow-md">
+                    <div id="tech-nav" class="md:w-1/3 flex-shrink-0 space-y-2">
+                    </div>
+                    <div id="tech-content" class="md:w-2/3 bg-white p-6 rounded-lg min-h-[300px]">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="library" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Premium Prompt Library</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Explore concrete examples of premium prompts designed for specific, high-value use cases. Each prompt applies the advanced techniques from the toolkit to automate complex professional tasks, showcasing the tangible output of expert prompt engineering.</p>
+                </div>
+                <div class="max-w-5xl mx-auto">
+                    <div id="prompt-tabs" class="flex flex-wrap justify-center border-b border-gray-200 mb-8">
+                    </div>
+                    <div id="prompt-content-area" class="bg-white p-6 rounded-lg shadow-md">
+                    </div>
+                </div>
+                <div class="mt-12 text-center">
+                    <p class="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">Ready to unlock the full power of AI for your specific needs? Join our waitlist to be notified about pricing and package options for our full range of premium prompt packages!</p>
+                    <a href="https://aimethods.co/waitlist" class="cta-button cta-button-primary">Join the Waitlist Today!</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="sparkle-prompt" class="py-20 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">✨ Try a Premium Prompt ✨</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">See the power of a meticulously crafted prompt! Enter a basic idea, and our AI will transform it into a professional, high-value prompt using the techniques outlined in our toolkit.</p>
+                <div class="max-w-3xl mx-auto bg-gray-50 p-6 rounded-lg shadow-md">
+                    <textarea id="basicPromptInput" class="w-full p-4 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 resize-y min-h-[120px] text-gray-700" placeholder="e.g., Write a marketing email for a new software feature called 'AI Methods Pro'."></textarea>
+                    <button id="generateSparklePrompt" class="cta-button cta-button-primary w-full md:w-auto">Generate Premium Prompt</button>
+                    <div id="sparklePromptOutput" class="mt-6 text-left">
+                        <div id="loadingIndicator" class="hidden text-center text-blue-600 font-semibold">Generating your premium prompt...</div>
+                        <pre id="generatedPromptDisplay" class="code-block whitespace-pre-wrap hidden"></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="strategy" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Market Opportunity & Strategy</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">The demand for specialized AI solutions is growing exponentially. This section outlines the market landscape and strategic approach for commercializing a premium prompt library, from productization to ensuring long-term value through continuous maintenance.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="chart-container">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-2 text-gray-700">Packaging & Pricing</h3>
+                            <p class="text-gray-600">Beyond individual sales, curated bundles and subscription models offer continuous value, providing users with a library that evolves alongside AI technology itself. This ensures prompts remain effective and justifies recurring revenue.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-2 text-gray-700">Marketing & Positioning</h3>
+                            <p class="text-gray-600">Focus on tangible benefits: time saved, errors eliminated, and access to virtual expertise. Case studies and educational content will demonstrate the clear ROI to a professional audience of analysts, creators, and builders.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-2 text-gray-700">Scalability & Maintenance</h3>
+                            <p class="text-gray-600">Success hinges on a robust framework of versioning, documentation, and automated testing. Continuous adaptation to new LLM versions is not just maintenance—it's a core feature of the premium value proposition.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="bg-gray-800 text-gray-300 py-12">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-xl font-bold text-white mb-4">AIMethods.co</h3>
+                <p class="text-sm">Empowering professionals with indispensable AI tools and expert-crafted prompts to elevate their work.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold text-white mb-4">Products</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="https://aimethods.co/prompts" class="hover:text-white transition-colors">Premium Prompts</a></li>
+                    <li><a href="https://aimethods.co/custom-solutions" class="hover:text-white transition-colors">Custom AI Solutions</a></li>
+                    <li><a href="https://aimethods.co/training" class="hover:text-white transition-colors">AI Training</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold text-white mb-4">Resources</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="https://aimethods.co/blog" class="hover:text-white transition-colors">Blog</a></li>
+                    <li><a href="https://aimethods.co/case-studies" class="hover:text-white transition-colors">Case Studies</a></li>
+                    <li><a href="https://aimethods.co/faq" class="hover:text-white transition-colors">FAQ</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold text-white mb-4">Company</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="https://aimethods.co/about" class="hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="https://aimethods.co/contact" class="hover:text-white transition-colors">Contact</a></li>
+                    <li><a href="https://aimethods.co/privacy" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="https://aimethods.co/terms" class="hover:text-white transition-colors">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container mx-auto px-6 mt-8 border-t border-gray-700 pt-8 text-center text-sm">
+            &copy; 2025 AIMethods.co. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const checklistData = [
+            { criterion: 'Complexity Handled', description: 'Automates tasks that typically demand expert human analysis, saving significant time and specialized labor costs.', techniques: ['Chain-of-Thought', 'Task Decomposition', 'Tree-of-Thought', 'ReAct'] },
+            { criterion: 'Output Accuracy & Reliability', description: 'Reduces the need for extensive manual review and correction, preventing costly errors and ensuring trustworthiness.', techniques: ['Self-Consistency', 'Generate Knowledge', 'RAG', 'Few-Shot'] },
+            { criterion: 'Significant Time Savings', description: 'Frees up valuable professional time, allowing users to focus on higher-level strategic work.', techniques: ['All techniques combined for efficiency'] },
+            { criterion: 'Deep Domain Specificity', description: 'Delivers specialized insights that generic AI models cannot, acting as a virtual subject matter expert.', techniques: ['Persona Prompting', 'Contextual Prompting', 'Few-Shot'] },
+            { criterion: 'High Reusability & Scalability', description: 'Offers long-term value by serving as a repeatable solution for recurring complex tasks.', techniques: ['Structured Prompts', 'Parameterization'] },
+            { criterion: 'Integration Readiness', description: 'Enables automation of downstream processes, enhancing overall system efficiency and reducing manual data manipulation.', techniques: ['Structured Output Definition'] }
+        ];
+
+        const techData = {
+            "Chain-of-Thought (CoT)": {
+                description: "Guides the model to break down complex problems into sequential, logical steps, articulating its intermediate thought processes. This enhances reasoning, particularly for math and symbolic reasoning, improving accuracy and transparency.",
+                benefit: "Improved reasoning and problem-solving.",
+                visual: '<div class="flex items-center space-x-2"><div class="p-3 bg-blue-100 rounded-md">Step 1</div><div class="text-gray-400">&rarr;</div><div class="p-3 bg-blue-100 rounded-md">Step 2</div><div class="text-gray-400">&rarr;</div><div class="p-3 bg-blue-100 rounded-md">Answer</div></div>'
+            },
+            "Few-Shot Prompting": {
+                description: "Provides a small number of input-output examples ('shots') within the prompt to demonstrate the desired task, tone, or format. This helps the model understand the expected response pattern without being explicitly told.",
+                benefit: "Better performance and consistency on new tasks.",
+                visual: '<div class="space-y-2"><div class="p-2 bg-green-100 rounded-md">Example 1: Input &rarr; Output</div><div class="p-2 bg-green-100 rounded-md">Example 2: Input &rarr; Output</div><div class="p-2 bg-gray-200 rounded-md">New Input &rarr; ?</div></div>'
+            },
+            "Persona Prompting": {
+                description: "Assigns a specific character, role, or expertise to the AI (e.g., 'Act as a senior data analyst'). This influences its tone, vocabulary, and perspective, leading to more authoritative and domain-specific responses.",
+                benefit: "Ensures domain-specific, authoritative answers.",
+                visual: '<div class="flex items-center space-x-4"><div class="text-4xl">🧑‍⚖️</div><div><div class="font-semibold">AI Persona</div><div class="text-sm text-gray-600">"Expert SQL Architect"</div></div></div>'
+            },
+            "Task Decomposition": {
+                description: "Breaks down a complex overall task into smaller, more manageable subtasks that the AI processes sequentially. This simplifies complex problems and reduces the likelihood of errors.",
+                benefit: "Manages complexity and improves reliability.",
+                visual: '<div class="flex flex-col space-y-2"><div class="p-3 bg-purple-100 rounded-md">Main Task</div><div class="pl-6 flex flex-col space-y-2"><div class="p-2 bg-purple-50 rounded-md">Sub-task A</div><div class="p-2 bg-purple-50 rounded-md">Sub-task B</div></div></div>'
+            },
+            "Retrieval Augmented Generation (RAG)": {
+                description: "Integrates external, up-to-date information retrieval with the generative AI. The model uses this fetched knowledge to produce responses that are more accurate and grounded in current or proprietary data.",
+                benefit: "Provides more informed and factually accurate responses.",
+                visual: '<div class="flex items-center space-x-2"><div class="p-3 bg-yellow-100 rounded-md">External Data</div><div class="text-gray-400">+</div><div class="p-3 bg-yellow-100 rounded-md">LLM</div><div class="text-gray-400">&rarr;</div><div class="p-3 bg-yellow-200 rounded-md">Augmented Answer</div></div>'
+            },
+            "Tree-of-Thought (ToT)": {
+                description: "Extends CoT by encouraging the model to explore multiple branches of reasoning simultaneously before converging on a final output. This allows for more robust and comprehensive problem-solving.",
+                benefit: "Facilitates better solutions for complex problems with multiple paths.",
+                visual: '<div class="flex flex-col items-center"><div class="p-2 bg-indigo-100 rounded-md">Problem</div><div class="flex space-x-4 mt-2"><div class="flex flex-col items-center"><div class="w-0.5 h-4 bg-gray-300"></div><div class="p-2 bg-indigo-50 rounded-md">Path A</div></div><div class="flex flex-col items-center"><div class="w-0.5 h-4 bg-gray-300"></div><div class="p-2 bg-indigo-50 rounded-md">Path B</div></div></div></div>'
+            }
+        };
+
+        const promptData = {
+            "SQL Debugger": {
+                category: "Data & Analytics",
+                value: "Acts as a virtual senior SQL architect, identifying subtle errors, performance bottlenecks, and syntax issues. It provides corrections, detailed explanations, and optimized alternatives, saving hours of manual debugging.",
+                techniques: ["Persona Prompting", "Chain-of-Thought", "Structured Output"],
+                content: `
+You are an Expert SQL Architect with over 20 years of experience in optimizing, debugging, and refactoring complex SQL queries for high-performance, enterprise-grade relational databases. Your task is to meticulously review a provided SQL query.
+
+**Follow these steps for your analysis:**
+1.  **Syntax Check:** Validate the SQL syntax.
+2.  **Logical Flow Analysis:** Trace the data flow and operations.
+3.  **Performance Bottleneck Identification:** Analyze for anti-patterns.
+4.  **Best Practices Review:** Assess against general SQL best practices.
+5.  **Provide Corrected & Optimized Query.**
+6.  **Explain Changes:** Detail why each change was made.
+
+**Input Data:**
+**SQL Dialect:** [User provides dialect]
+**Database Schema:** [User provides schema]
+**Original SQL Query:** [User provides query]
+**Observed Error/Problem:** [User provides error]
+
+**Output Format:**
+Provide the response in Markdown, structured with the following headings:
+### SQL Debugging and Optimization Report
+#### 1. Syntax Review
+#### 2. Logical Flow Analysis
+#### 3. Performance Bottleneck Identification & Optimization
+#### 4. Best Practices Adherence
+#### 5. Corrected & Optimized SQL Query
+\`\`\`sql
+-- Corrected and Optimized Query Here
+\`\`\`
+#### 6. Explanation of Changes
+`
+            },
+            "Resume Optimizer": {
+                category: "Job Search & Career",
+                value: "Transforms a generic resume into a targeted, ATS-friendly document optimized for a specific job. It provides strategic advice on phrasing and impact statements, significantly increasing the chances of securing an interview.",
+                techniques: ["Persona Prompting", "Task Decomposition", "Contextual Prompting"],
+                content: `
+You are a Senior Talent Acquisition Specialist with deep knowledge of Applicant Tracking Systems (ATS) and what makes a resume stand out. Your goal is to optimize a resume for a specific job description.
+
+**Analyze and perform the following steps:**
+1.  **ATS Keyword Analysis:** Identify and highlight missing keywords.
+2.  **Impact Statement Enhancement:** Rephrase bullet points to be action-oriented and quantifiable.
+3.  **Summary/Objective Optimization:** Draft a compelling summary tailored to the job.
+4.  **Formatting & Readability Suggestions:** Provide recommendations for structure and layout.
+5.  **Identify Missing Information/Gaps.**
+
+**Input Data:**
+**Candidate's Current Resume:** [User provides resume text]
+**Target Job Description:** [User provides job description]
+
+**Output Format:**
+Provide the response in Markdown, structured with the following headings:
+### Resume Optimization Report
+#### 1. ATS Keyword Alignment & Gaps
+#### 2. Enhanced Impact Statements (Examples)
+#### 3. Optimized Professional Summary/Objective
+#### 4. Formatting & Readability Recommendations
+#### 5. Additional Areas for Improvement
+`
+            },
+            "Dashboard Explainer": {
+                category: "Data & Analytics",
+                value: "Transforms complex data dashboards into clear, actionable narratives for non-technical stakeholders. It interprets trends and explains their business implications, improving data literacy and speeding up decision-making.",
+                techniques: ["Persona Prompting", "Chain-of-Thought", "Structured Output"],
+                content: `
+You are a Senior Data Storyteller and Business Analyst. Your objective is to explain a dashboard's key metrics, trends, and implications to a non-technical audience.
+
+**Follow these steps to construct your explanation:**
+1.  **Dashboard Overview:** Describe the dashboard's purpose.
+2.  **Key Metric Interpretation:** Explain each primary metric's significance.
+3.  **Trend Analysis:** Identify and interpret significant trends or anomalies.
+4.  **Root Cause & Impact Hypothesis:** Hypothesize causes and business impacts.
+5.  **Actionable Insights & Recommendations:** Translate insights into clear recommendations.
+6.  **Concise Summary:** Provide a high-level summary of takeaways.
+
+**Input Data:**
+**Dashboard Description/Purpose:** [User provides details]
+**Target Audience:** [User provides audience]
+**Key Dashboard Components:** [User describes charts/tables]
+
+**Output Format:**
+Provide the response as a narrative report in Markdown:
+### Dashboard Analysis
+#### 1. Executive Overview
+#### 2. Key Metric Deep Dive
+#### 3. Trend Analysis & Observations
+#### 4. Hypothesized Causes & Business Impact
+#### 5. Strategic Recommendations & Next Steps
+`
+            },
+            "Cover Letter Draft": {
+                category: "Job Search & Career",
+                value: "Generates a highly personalized and compelling cover letter for a specific job application. It strategically highlights relevant skills and aligns with company values, distinguishing the applicant from generic submissions.",
+                techniques: ["Persona Prompting", "Task Decomposition", "Contextual Prompting"],
+                content: `
+You are a Professional Career Coach specializing in crafting impactful, personalized cover letters. Your task is to draft a compelling letter for a candidate.
+
+**Follow these steps to construct the letter:**
+1.  **Analyze Alignment:** Match candidate experience to job requirements.
+2.  **Personalized Introduction:** Draft an engaging opening paragraph.
+3.  **Skills & Experience Body Paragraphs:** Create 2-3 paragraphs highlighting achievements.
+4.  **Company Alignment:** Integrate insights about the company to show genuine interest.
+5.  **Strong Call to Action:** Conclude with a confident closing.
+6.  **Tone & Length:** Maintain a professional, concise tone (3-4 paragraphs).
+
+**Input Data:**
+**Candidate's Name & Background:** [User provides info]
+**Target Company & Job Title:** [User provides info]
+**Hiring Manager Name (if known, otherwise leave blank):**
+**Job Description:**
+**Key Candidate Achievements/Skills to Highlight (specific examples):**
+* [Achievement 1: e.g., "Successfully managed CRM system for 200+ clients, improving data accuracy by 15%."]
+* [Achievement 2: e.g., "Led cross-functional team of 5 to launch new product, exceeding Q1 revenue targets by 10%."]
+* [Achievement 3: e.g., "Implemented new customer feedback loop, increasing customer satisfaction scores by 8%."]
+**Why Candidate is Interested in THIS Company/Role (specific reasons):**
+* [Reason 1: e.g., "Deep admiration for Company X's innovative approach to sustainable technology."]
+* [Reason 2: e.g., "Excited by the opportunity to contribute to a team focused on developing cutting-edge AI solutions."]
+
+**Output Format:**
+Provide the cover letter in plain text, formatted as a standard business letter, ready for copy-pasting. Include a placeholder for the date and recipient address.
+`
+            }
+        };
+
+        const checklistContainer = document.getElementById('value-checklist');
+        checklistData.forEach(item => {
+            const element = document.createElement('div');
+            element.className = 'bg-white rounded-lg shadow-sm overflow-hidden';
+            element.innerHTML = `
+                <button class="w-full text-left p-4 font-semibold text-gray-700 flex justify-between items-center hover:bg-gray-100 transition-colors">
+                    <span>${item.criterion}</span>
+                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="px-4 pb-4 bg-gray-50 hidden">
+                    <p class="text-gray-600">${item.description}</p>
+                    <div class="mt-2 text-sm">
+                        <span class="font-semibold">Key Techniques:</span>
+                        <span class="text-blue-600">${item.techniques.join(', ')}</span>
+                    </div>
+                </div>
+            `;
+            checklistContainer.appendChild(element);
+        });
+
+        checklistContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (button) {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('svg');
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            }
+        });
+        
+        const techNav = document.getElementById('tech-nav');
+        const techContent = document.getElementById('tech-content');
+        Object.keys(techData).forEach((techName, index) => {
+            const button = document.createElement('button');
+            button.className = 'tech-btn w-full text-left p-3 rounded-md transition-colors';
+            button.textContent = techName;
+            button.dataset.tech = techName;
+            techNav.appendChild(button);
+
+            if (index === 0) {
+                button.classList.add('active-tech');
+                updateTechContent(techName);
+            }
+        });
+
+        function updateTechContent(techName) {
+            const tech = techData[techName];
+            techContent.innerHTML = `
+                <h3 class="text-xl font-bold text-gray-800 mb-2">${techName}</h3>
+                <p class="text-gray-600 mb-4">${tech.description}</p>
+                <div class="bg-gray-100 p-3 rounded-md">
+                    <p class="font-semibold text-gray-700">Primary Benefit:</p>
+                    <p class="text-gray-600">${tech.benefit}</p>
+                    <div class="mt-4">
+                        <p class="font-semibold text-gray-700 mb-2">Visual Concept:</p>
+                        ${tech.visual}
+                    </div>
+                </div>
+            `;
+        }
+
+        techNav.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') {
+                document.querySelectorAll('.tech-btn').forEach(btn => btn.classList.remove('active-tech'));
+                e.target.classList.add('active-tech');
+                updateTechContent(e.target.dataset.tech);
+            }
+        });
+        
+        const promptTabsContainer = document.getElementById('prompt-tabs');
+        const promptContentArea = document.getElementById('prompt-content-area');
+
+        Object.keys(promptData).forEach((promptName, index) => {
+            const tabButton = document.createElement('button');
+            tabButton.textContent = promptName;
+            tabButton.dataset.prompt = promptName;
+            tabButton.className = 'tab-btn px-4 py-2 -mb-px font-semibold text-gray-600 border-b-2 border-transparent rounded-t-lg hover:text-blue-600 hover:border-blue-300';
+            promptTabsContainer.appendChild(tabButton);
+
+            if (index === 0) {
+                tabButton.classList.add('active-tab');
+                updatePromptContent(promptName);
+            }
+        });
+        
+        promptTabsContainer.addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') {
+                document.querySelectorAll('#prompt-tabs button').forEach(btn => btn.classList.remove('active-tab'));
+                e.target.classList.add('active-tab');
+                updatePromptContent(e.target.dataset.prompt);
+            }
+        });
+
+        function updatePromptContent(promptName) {
+            const prompt = promptData[promptName];
+            promptContentArea.innerHTML = `
+                <div class="prompt-card active">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">${promptName}</h3>
+                    <p class="text-sm font-semibold text-blue-600 uppercase tracking-wide mb-4">${prompt.category}</p>
+                    <p class="text-gray-600 mb-4">${prompt.value}</p>
+                    <div class="mb-6">
+                        <span class="font-semibold mr-2">Techniques Used:</span>
+                        <span class="text-blue-600">${prompt.techniques.map(t => `<span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">${t}</span>`).join('')}</span>
+                    </div>
+                    <h4 class="font-semibold text-lg mb-2">Prompt Template:</h4>
+                    <pre class="code-block"><code>${prompt.content.trim()}</code></pre>
+                </div>
+            `;
+        }
+
+        const ctx = document.getElementById('marketChart').getContext('2d');
+        const marketChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['2025', '2028', '2031', '2034'],
+                datasets: [{
+                    label: 'Projected Market Size (in Billion USD)',
+                    data: [415.7, 1157.9, 3225.5, 6533.87],
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Market Size (Billion USD)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y) + 'B';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gemini API Integration - Sparkle Prompt Generator
+        const basicPromptInput = document.getElementById('basicPromptInput');
+        const generateSparklePrompt = document.getElementById('generateSparklePrompt');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const generatedPromptDisplay = document.getElementById('generatedPromptDisplay');
+
+        generateSparklePrompt.addEventListener('click', async () => {
+            const userInput = basicPromptInput.value.trim();
+            if (!userInput) {
+                generatedPromptDisplay.textContent = 'Please enter a basic idea to generate a premium prompt.';
+                generatedPromptDisplay.classList.remove('hidden');
+                generatedPromptDisplay.style.color = '#DC2626'; // Red for error
+                return;
+            }
+
+            loadingIndicator.classList.remove('hidden');
+            generatedPromptDisplay.classList.add('hidden');
+            generatedPromptDisplay.style.color = ''; // Reset color
+
+            try {
+                const prompt = `You are an expert prompt engineer specializing in crafting highly effective, high-value prompts.
+A user has provided a basic idea for a prompt. Your task is to transform this basic idea into a comprehensive, premium-grade prompt suitable for professional use.
+Incorporate elements like:
+- A clear, specific persona for the AI to adopt.
+- Explicit instructions for desired tone and style.
+- A structured output format (e.g., Markdown headings, bullet points, JSON schema if applicable).
+- A request for step-by-step reasoning (Chain-of-Thought) if the task is complex.
+- Consideration of potential constraints or specific requirements.
+
+**Basic Idea:** ${userInput}
+
+**Premium Prompt:**`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    generatedPromptDisplay.textContent = text;
+                    generatedPromptDisplay.classList.remove('hidden');
+                } else {
+                    generatedPromptDisplay.textContent = 'Failed to generate prompt. Please try again.';
+                    generatedPromptDisplay.classList.remove('hidden');
+                    generatedPromptDisplay.style.color = '#DC2626'; // Red for error
+                }
+            } catch (error) {
+                console.error('Error generating premium prompt:', error);
+                generatedPromptDisplay.textContent = 'An error occurred. Please try again.';
+                generatedPromptDisplay.classList.remove('hidden');
+                generatedPromptDisplay.style.color = '#DC2626'; // Red for error
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+    });
+    </script>
+</body>
+</html>

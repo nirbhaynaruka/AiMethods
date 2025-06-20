@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMethods.co: Join Our Waitlist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutral Tech -->
+    <!-- Application Structure Plan: This is a standalone waitlist page with a simple form. It reuses the global header and footer from aimethods.co for brand consistency. The main content area focuses solely on the waitlist form and a clear value proposition for joining. -->
+    <!-- Visualization & Content Choices: Primary goal is information collection. Method: Simple HTML form with input fields for email, name, and an optional message. No complex visualizations are needed here. This directly supports the goal of gathering user interest and feedback on pricing. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #1a202c;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px; /* Fully rounded */
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .cta-button-primary {
+            background-color: #3B82F6; /* Blue-600 */
+            color: white;
+            border: 2px solid transparent;
+        }
+        .cta-button-primary:hover {
+            background-color: #2563EB; /* Blue-700 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Global Header (Consistent with aimethods.co) -->
+    <header class="bg-gray-800 text-white sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="https://aimethods.co" class="text-2xl font-bold text-white hover:text-gray-300 transition-colors">AIMethods.co</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="https://aimethods.co/home" class="text-white hover:text-gray-300 transition-colors">Home</a>
+                <a href="https://aimethods.co/products" class="text-white hover:text-gray-300 transition-colors">Products</a>
+                <a href="https://aimethods.co/solutions" class="text-white hover:text-gray-300 transition-colors">Solutions</a>
+                <a href="https://aimethods.co/about" class="text-white hover:text-gray-300 transition-colors">About Us</a>
+                <a href="https://aimethods.co/contact" class="text-white hover:text-gray-300 transition-colors">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="py-20 bg-gray-50 min-h-[calc(100vh-120px)] flex items-center justify-center">
+        <div class="container mx-auto px-6 max-w-2xl bg-white p-8 rounded-lg shadow-xl text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Join Our Premium Prompts Waitlist</h1>
+            <p class="text-lg text-gray-600 mb-8">Be the first to know when our expertly crafted AI prompt packages launch! Join our waitlist to receive exclusive updates, early access opportunities, and provide valuable input on pricing and features tailored to your needs.</p>
+            
+            <form id="waitlistForm" class="space-y-6">
+                <div>
+                    <label for="name" class="block text-left text-gray-700 text-sm font-semibold mb-2">Your Name</label>
+                    <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-700" placeholder="John Doe" required>
+                </div>
+                <div>
+                    <label for="email" class="block text-left text-gray-700 text-sm font-semibold mb-2">Your Email</label>
+                    <input type="email" id="email" name="email" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-700" placeholder="you@example.com" required>
+                </div>
+                <div>
+                    <label for="interest" class="block text-left text-gray-700 text-sm font-semibold mb-2">How do you plan to use AI prompts?</label>
+                    <textarea id="interest" name="interest" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-700 resize-y" placeholder="e.g., For data analysis, content creation, coding assistance, or specific industry tasks."></textarea>
+                </div>
+                <div>
+                    <label for="price_feedback" class="block text-left text-gray-700 text-sm font-semibold mb-2">What pricing model or package options would appeal most to you?</label>
+                    <input type="text" id="price_feedback" name="price_feedback" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-700" placeholder="e.g., Subscription, per-prompt, bundles, tiered pricing.">
+                </div>
+                <button type="submit" class="cta-button cta-button-primary w-full">Join Waitlist</button>
+            </form>
+            <div id="formMessage" class="mt-4 text-sm hidden"></div>
+        </div>
+    </main>
+
+    <!-- Global Footer (Consistent with aimethods.co) -->
+    <footer class="bg-gray-800 text-gray-300 py-12">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-xl font-bold text-white mb-4">AIMethods.co</h3>
+                <p class="text-sm">Empowering professionals with indispensable AI tools and expert-crafted prompts to elevate their work.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold text-white mb-4">Products</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="https://aimethods.co/prompts" class="hover:text-white transition-colors">Premium Prompts</a></li>
+                    <li><a href="https://aimethods.co/custom-solutions" class="hover:text-white transition-colors">Custom AI Solutions</a></li>
+                    <li><a href="https://aimethods.co/training" class="hover:text-white transition-colors">AI Training</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold text-white mb-4">Resources</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="https://aimethods.co/blog" class="hover:text-white transition-colors">Blog</a></li>
+                    <li><a href="https://aimethods.co/case-studies" class="hover:text-white transition-colors">Case Studies</a></li>
+                    <li><a href="https://aimethods.co/faq" class="hover:text-white transition-colors">FAQ</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold text-white mb-4">Company</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="https://aimethods.co/about" class="hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="https://aimethods.co/contact" class="hover:text-white transition-colors">Contact</a></li>
+                    <li><a href="https://aimethods.co/privacy" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="https://aimethods.co/terms" class="hover:text-white transition-colors">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container mx-auto px-6 mt-8 border-t border-gray-700 pt-8 text-center text-sm">
+            &copy; 2025 AIMethods.co. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('waitlistForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const formMessage = document.getElementById('formMessage');
+            const submitButton = this.querySelector('button[type="submit"]');
+
+            // Clear previous messages and disable button
+            formMessage.classList.add('hidden');
+            formMessage.classList.remove('text-red-600', 'text-green-600');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+
+            // Collect form data
+            const formData = new FormData(this);
+            const data = {};
+            for (const [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            // IMPORTANT:
+            // You MUST replace 'https://formspree.io/f/your_unique_form_hash' below
+            // with the actual endpoint URL provided by Formspree after you set up your form.
+            const FORM_SUBMISSION_ENDPOINT = 'https://formspree.io/f/mdkzlkvv'; // <<< REPLACE THIS URL WITH YOUR FORMSPREE ENDPOINT
+
+            fetch(FORM_SUBMISSION_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Formspree supports JSON, which is cleaner
+                    'Accept': 'application/json'         // Important for Formspree to return JSON responses
+                },
+                body: JSON.stringify(data)
+            })
+            .then(async response => {
+                if (response.ok) {
+                    formMessage.textContent = 'Thank you for joining our waitlist! We will be in touch soon.';
+                    formMessage.classList.remove('hidden');
+                    formMessage.classList.add('text-green-600');
+                    this.reset(); // Clear the form on success
+                } else {
+                    let errorText = 'Failed to join waitlist. Please try again.';
+                    try {
+                        // Formspree might return errors in JSON
+                        const errorData = await response.json();
+                        if (errorData.errors && errorData.errors.length > 0) {
+                            errorText = errorData.errors.map(err => err.message).join(', ') || errorText;
+                        } else if (errorData.form) { // Sometimes a general form error
+                            errorText = errorData.form || errorText;
+                        }
+                    } catch (e) {
+                        // If response is not JSON, use generic error
+                        console.error('Non-JSON error response from Formspree:', await response.text());
+                    }
+                    formMessage.textContent = `Error: ${errorText}`;
+                    formMessage.classList.remove('hidden');
+                    formMessage.classList.add('text-red-600');
+                }
+            })
+            .catch(error => {
+                console.error('Submission error:', error);
+                formMessage.textContent = 'An unexpected error occurred. Please check your internet connection and try again.';
+                formMessage.classList.remove('hidden');
+                formMessage.classList.add('text-red-600');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Join Waitlist'; // Reset button text
+            });
+        });
+    </script>
+</body>
+</html>
