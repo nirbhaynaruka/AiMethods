@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -155,6 +156,7 @@
             opacity: 1;
         }
     </style>
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-remote-config-compat.js"></script>
@@ -164,6 +166,7 @@
 
     <div id="page-content">
         <main>
+            <!-- Product-Specific Navigation for Prompts SPA (relative paths corrected) -->
             <nav class="bg-white/80 backdrop-blur-md sticky top-[68px] z-40 shadow-sm border-b border-gray-200">
                 <div class="container mx-auto px-6 py-3 flex justify-center md:justify-start space-x-6 md:space-x-8 text-gray-700">
                     <a href="#hero" class="nav-link-product font-semibold text-blue-600">Prompts Overview</a>
@@ -290,9 +293,9 @@
     <div id="footer-placeholder"></div>
 
     <script>
-    // Your web app's Firebase configuration
+    // Your web app's Firebase configuration (from Firebase Console)
     const firebaseConfig = {
-      apiKey: "AIzaSyCbNQcNzFObrnzAuBqFUFFOTA6RdaSFw6o", // Replace with your actual Firebase Web API Key
+      apiKey: "AIzaSyCbNQcNzFObrnzAuBqFUFFOTA6RdaSFw6o", // Use your actual Firebase Web API Key
       authDomain: "aimethods-e8521.firebaseapp.com",
       projectId: "aimethods-e8521",
       storageBucket: "aimethods-e8521.firebasestorage.app",
@@ -325,8 +328,8 @@
         }
 
         // Load header and footer (relative to prompts/index.html is ../headerfooter/)
-        await loadComponent('header-placeholder', '../header/');
-        await loadComponent('footer-placeholder', '../footer/');
+        await loadComponent('header-placeholder', '../headerfooter/header.html');
+        await loadComponent('footer-placeholder', '../headerfooter/footer.html');
 
         // Initialize Mobile Menu (as this JS is now loaded after header content)
         const mobileMenuButton = document.getElementById('mobile-menu-button');
@@ -691,7 +694,39 @@ Provide the cover letter in plain text, formatted as a standard business letter,
         const loadingIndicator = document.getElementById('loadingIndicator');
         const generatedPromptDisplay = document.getElementById('generatedPromptDisplay');
 
+        let geminiApiKey = null; // Variable to store fetched API key
+
+        // Fetch API key from Firebase Remote Config when the page loads
+        async function fetchGeminiApiKey() {
+            try {
+                await remoteConfig.fetchAndActivate();
+                geminiApiKey = remoteConfig.getString('GEMINI_API_KEY');
+                console.log("Gemini API Key fetched successfully:", geminiApiKey ? "******" : "Not found");
+            } catch (error) {
+                console.error("Error fetching Remote Config key:", error);
+                // Optionally display an error message to the user or disable functionality
+                const sparklePromptSection = document.getElementById('sparkle-prompt');
+                if (sparklePromptSection) {
+                    sparklePromptSection.innerHTML = `
+                        <div class="container mx-auto px-6 text-center">
+                            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">✨ Try a Premium Prompt ✨</h2>
+                            <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">AI capabilities are currently unavailable. Please check your network connection or try again later.</p>
+                            <p class="text-red-600 font-semibold">Error: Could not load AI features.</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+        fetchGeminiApiKey(); // Call this function on page load
+
         generateSparklePrompt.addEventListener('click', async () => {
+            if (!geminiApiKey) {
+                generatedPromptDisplay.textContent = 'AI capabilities not initialized. Please refresh the page.';
+                generatedPromptDisplay.classList.remove('hidden');
+                generatedPromptDisplay.style.color = '#DC2626'; // Red for error
+                return;
+            }
+
             const userInput = basicPromptInput.value.trim();
             if (!userInput) {
                 generatedPromptDisplay.textContent = 'Please enter a basic idea to generate a premium prompt.';
@@ -703,26 +738,21 @@ Provide the cover letter in plain text, formatted as a standard business letter,
             loadingIndicator.classList.remove('hidden');
             generatedPromptDisplay.classList.add('hidden');
             generatedPromptDisplay.style.color = ''; // Reset color
+            generatedPromptDisplay.textContent = ''; // Clear previous output
 
             try {
+                // REVISED LLM PROMPT: More concise, avoiding markdown chars
                 const prompt = `You are an expert prompt engineer specializing in crafting highly effective, high-value prompts.
-A user has provided a basic idea for a prompt. Your task is to transform this basic idea into a comprehensive, premium-grade prompt suitable for professional use.
-Incorporate elements like:
-- A clear, specific persona for the AI to adopt.
-- Explicit instructions for desired tone and style.
-- A structured output format (e.g., Markdown headings, bullet points, JSON schema if applicable).
-- A request for step-by-step reasoning (Chain-of-Thought) if the task is complex.
-- Consideration of potential constraints or specific requirements.
-- dont make it so long and avoiding markdown characters (*, #).
-**Basic Idea:** ${userInput}
+A user has provided a basic idea for a prompt. Your task is to transform this basic idea into a concise, premium-grade prompt suitable for professional use. Focus on clarity, directness, and value. Avoid markdown characters (*, #) in the output. Structure the output into brief, direct paragraphs.
 
-**Premium Prompt:**`;
+Basic Idea: "${userInput}"
+
+Premium Prompt:`;
 
                 let chatHistory = [];
                 chatHistory.push({ role: "user", parts: [{ text: prompt }] });
                 const payload = { contents: chatHistory };
-                const apiKey = "AIzaSyAHwM7bzmfVJwfRuSdDTxt2tDnz1BmzlkA";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`; // Use fetched key
 
                 const response = await fetch(apiUrl, {
                     method: 'POST',

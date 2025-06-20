@@ -261,7 +261,7 @@
             try {
                 await remoteConfig.fetchAndActivate();
                 geminiApiKey = remoteConfig.getString('GEMINI_API_KEY');
-                console.log("Gemini API Key fetched successfully:", geminiApiKey ? "******" + geminiApiKey.slice(-5) : "Not found");
+                console.log("Gemini API Key fetched successfully:", geminiApiKey ? "******" : "Not found");
             } catch (error) {
                 console.error("Error fetching Remote Config key:", error);
                 advantageDisplay.textContent = 'Error loading AI capabilities. Please try again later.';
