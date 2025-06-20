@@ -243,3 +243,343 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiMethods - Empowering AI Workflows</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutral Tech -->
+    <!-- Application Structure Plan: This is the main site homepage (index.html). It now dynamically loads header and footer content using JavaScript injection for modularity. The content flow includes: a compelling hero section introducing AiMethods, a focused section highlighting Premium Prompts, an LLM-powered "Find Your AI Advantage" section, and calls to action to navigate. LLM feature now securely calls Firebase Remote Config for API key. -->
+    <!-- Visualization & Content Choices: Uses simple HTML and Tailwind. Textual content dominates, with strategic use of buttons. LLM feature (text input -> Firebase Remote Config for API Key -> direct Gemini API call -> text output) for personalized workflow suggestions. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #1a202c;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #EBF8FF; /* Light blue on hover for dark header */
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px; /* Fully rounded */
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .cta-button-primary {
+            background-color: #3B82F6; /* Blue-600 */
+            color: white;
+            border: 2px solid transparent;
+        }
+        .cta-button-primary:hover {
+            background-color: #2563EB; /* Blue-700 */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .cta-button-secondary {
+            background-color: transparent;
+            color: #3B82F6; /* Blue-600 */
+            border: 2px solid #3B82F6;
+        }
+        .cta-button-secondary:hover {
+            background-color: #DBEAFE; /* Blue-100 */
+            color: #2563EB;
+        }
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 32, 44, 0.95); /* Dark overlay */
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-menu-overlay.open {
+            transform: translateX(0);
+        }
+        .mobile-menu-overlay a {
+            font-size: 1.8rem;
+            color: white;
+            padding: 1rem 0;
+            transition: color 0.2s ease;
+        }
+        .mobile-menu-overlay a:hover {
+            color: #3B82F6;
+        }
+        .close-button {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+        }
+        /* Hide content until header/footer are loaded to prevent FOUC */
+        #page-content {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #page-content.loaded {
+            opacity: 1;
+        }
+    </style>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-remote-config-compat.js"></script>
+</head>
+<body class="antialiased">
+    <div id="header-placeholder"></div>
+
+    <div id="page-content">
+        <main>
+            <!-- Hero Section: Main value proposition for AiMethods -->
+            <section class="py-20 md:py-32 text-center bg-white">
+                <div class="container mx-auto px-6">
+                    <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">Empower Your Workflows with AiMethods</h1>
+                    <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Unlock the full potential of Generative AI for your business with expertly crafted prompts, custom solutions, and strategic insights. Transform complex challenges into intelligent, automated workflows.</p>
+                    <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                        <a href="./prompts/" class="cta-button cta-button-primary">Explore Premium Prompts</a>
+                        <a href="./contact/" class="cta-button cta-button-secondary">Get Custom Solutions</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Our Solutions Section (Streamlined for V1) -->
+            <section class="py-20 bg-gray-50">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Our Solutions for Modern Workflows</h2>
+                        <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">We bridge the gap between powerful AI models and practical business applications. Discover how AiMethods can streamline your operations and elevate your output.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                            <div class="text-5xl mb-4">💡</div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Premium Prompt Library</h3>
+                            <p class="text-gray-600 mb-4">Access a curated collection of high-value AI prompts designed to automate complex tasks for data analysts, content creators, and business builders.</p>
+                            <a href="./prompts/" class="text-blue-600 font-medium hover:underline">Learn More &rarr;</a>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                            <div class="text-5xl mb-4">⚙️</div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Custom AI Solutions</h3>
+                            <p class="text-gray-600 mb-4">Tailored AI integration and workflow automation services to address your unique business challenges with precision and efficiency.</p>
+                            <a href="./solutions/" class="text-blue-600 font-medium hover:underline">Discover Solutions &rarr;</a>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                            <div class="text-5xl mb-4">📚</div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">AI Training & Consulting</h3>
+                            <p class="text-gray-600 mb-4">Expert-led training and strategic consulting to help your team master AI tools and integrate them effectively into your operations.</p>
+                            <a href="./training/" class="text-blue-600 font-medium hover:underline">Explore Training &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- New LLM Feature: Find Your AI Advantage -->
+            <section id="ai-advantage" class="py-20 bg-white">
+                <div class="container mx-auto px-6 text-center">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">✨ Find Your AI Advantage ✨</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">Describe your role or a key business challenge, and let our AI suggest how specialized prompts and AiMethods' solutions can streamline your workflow and drive results.</p>
+                    <div class="max-w-3xl mx-auto bg-gray-50 p-6 rounded-lg shadow-md">
+                        <textarea id="advantageInput" class="w-full p-4 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 resize-y min-h-[100px] text-gray-700" placeholder="e.g., I'm a marketing manager struggling with content ideas, or My team needs to analyze large datasets faster."></textarea>
+                        <button id="generateAdvantage" class="cta-button cta-button-primary w-full md:w-auto">Suggest My AI Workflow</button>
+                        <div id="advantageOutput" class="mt-6 text-left">
+                            <div id="advantageLoading" class="hidden text-center text-blue-600 font-semibold">Analyzing your needs...</div>
+                            <pre id="advantageDisplay" class="code-block whitespace-pre-wrap hidden text-gray-700 bg-gray-100"></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Call to Action for Waitlist -->
+            <section class="py-20 bg-gray-50 text-center">
+                <div class="container mx-auto px-6 max-w-3xl">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Ready to Get Started?</h2>
+                    <p class="text-lg text-gray-600 mb-8">Join our waitlist for exclusive updates on new prompt packages, early access opportunities, and provide your valuable input on our upcoming offerings!</p>
+                    <a href="./waitlist/" class="cta-button cta-button-primary">Join Our Waitlist Today!</a>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    
+    <div id="footer-placeholder"></div>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCbNQcNzFObrnzAuBqFUFFOTA6RdaSFw6o",
+          authDomain: "aimethods-e8521.firebaseapp.com",
+          projectId: "aimethods-e8521",
+          storageBucket: "aimethods-e8521.firebasestorage.app",
+          messagingSenderId: "1093809088702",
+          appId: "1:1093809088702:web:e893ba5362145e094196ef",
+          measurementId: "G-0LQHEBJ892"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const remoteConfig = firebase.remoteConfig();
+
+        // Enable developer mode for faster fetching during development (remove for production)
+        remoteConfig.settings.minimumFetchIntervalMillis = 10000; // 10 seconds
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Function to load and inject HTML content
+            async function loadComponent(placeholderId, filePath) {
+                try {
+                    const response = await fetch(filePath);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const html = await response.text();
+                    document.getElementById(placeholderId).innerHTML = html;
+                } catch (error) {
+                    console.error(`Could not load ${filePath}:`, error);
+                    document.getElementById(placeholderId).innerHTML = `<div class="text-red-500 text-center p-4">Error loading ${filePath}.</div>`;
+                }
+            }
+
+            // Load header and footer
+            await loadComponent('header-placeholder', './headerfooter/header.html');
+            await loadComponent('footer-placeholder', './headerfooter/footer.html');
+
+            // Initialize Mobile Menu (as this JS is now loaded after header content)
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+            const closeMobileMenu = document.getElementById('close-mobile-menu');
+
+            if (mobileMenuButton && mobileMenuOverlay && closeMobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenuOverlay.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                });
+
+                closeMobileMenu.addEventListener('click', () => {
+                    mobileMenuOverlay.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+
+                mobileMenuOverlay.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenuOverlay.classList.remove('open');
+                        document.body.style.overflow = '';
+                    });
+                });
+            } else {
+                console.warn("Mobile menu elements not found after header injection. Check header.html content.");
+            }
+            
+            // Show content after header/footer are loaded
+            document.getElementById('page-content').classList.add('loaded');
+
+
+            // LLM Feature: Find Your AI Advantage (specific to index.html)
+            const advantageInput = document.getElementById('advantageInput');
+            const generateAdvantage = document.getElementById('generateAdvantage');
+            const advantageLoading = document.getElementById('advantageLoading');
+            const advantageDisplay = document.getElementById('advantageDisplay');
+
+            let geminiApiKey = null; // Variable to store fetched API key
+
+            // Fetch API key from Firebase Remote Config
+            try {
+                await remoteConfig.fetchAndActivate();
+                geminiApiKey = remoteConfig.getString('GEMINI_API_KEY');
+                console.log("Gemini API Key fetched successfully:", geminiApiKey ? "******" + geminiApiKey.slice(-5) : "Not found");
+            } catch (error) {
+                console.error("Error fetching Remote Config key:", error);
+                advantageDisplay.textContent = 'Error loading AI capabilities. Please try again later.';
+                advantageDisplay.classList.remove('hidden');
+                advantageDisplay.style.color = '#DC2626';
+                advantageLoading.classList.add('hidden');
+                generateAdvantage.disabled = true; // Disable button if key fails to load
+            }
+
+            if (advantageInput && generateAdvantage) { // Ensure elements exist before adding listener
+                generateAdvantage.addEventListener('click', async () => {
+                    if (!geminiApiKey) {
+                        advantageDisplay.textContent = 'AI capabilities not initialized. Please refresh the page.';
+                        advantageDisplay.classList.remove('hidden');
+                        advantageDisplay.style.color = '#DC2626';
+                        return;
+                    }
+
+                    const userInput = advantageInput.value.trim();
+                    if (!userInput) {
+                        advantageDisplay.textContent = 'Please describe your role or a challenge to get AI workflow suggestions.';
+                        advantageDisplay.classList.remove('hidden');
+                        advantageDisplay.style.color = '#DC2626';
+                        return;
+                    }
+
+                    advantageLoading.classList.remove('hidden');
+                    advantageDisplay.classList.add('hidden');
+                    advantageDisplay.style.color = ''; // Reset color
+                    advantageDisplay.textContent = ''; // Clear previous output
+
+                    try {
+                        const prompt = `Based on the user's input, provide brief, direct suggestions (3-5 bullet points) on how AiMethods (premium AI prompts and custom solutions) can help. Each point should be a concise paragraph, avoiding markdown characters (*, #).
+
+User Input: "${userInput}"
+
+Suggestions:`;
+
+                        let chatHistory = [];
+                        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                        const payload = { contents: chatHistory };
+                        // Use the fetched API key
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+                        
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const text = result.candidates[0].content.parts[0].text;
+                            advantageDisplay.textContent = text;
+                            advantageDisplay.classList.remove('hidden');
+                            advantageDisplay.style.backgroundColor = '#F0F4F8'; // Light blue-gray for output
+                            advantageDisplay.style.color = '#1a202c'; // Dark text
+                        } else {
+                            advantageDisplay.textContent = 'Failed to generate suggestions. Please try again.';
+                            advantageDisplay.classList.remove('hidden');
+                            advantageDisplay.style.color = '#DC2626'; // Red for error
+                        }
+                    } catch (error) {
+                        console.error('Error generating AI advantage:', error);
+                        advantageDisplay.textContent = 'An error occurred. Please check your internet connection and try again.';
+                        advantageDisplay.classList.remove('hidden');
+                        advantageDisplay.style.color = '#DC2626'; // Red for error
+                    } finally {
+                        advantageLoading.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

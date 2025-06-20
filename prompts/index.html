@@ -3,30 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIMethods : Architecting Premium AI Prompts</title>
+    <title>AiMethods: Premium AI Prompts</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Calm Neutral Tech -->
-    <!-- Application Structure Plan: The SPA now features a distinct global header and footer, designed for site-wide consistency. The main content starts with a "Hero" section including a prominent CTA. The page-specific navigation (Value, Toolkit, Library, Strategy) is integrated as a sticky sub-navigation bar, ensuring easy access to content sections. The content flow is: "Value Proposition" (interactive checklist), "Prompt Architect's Toolkit" (interactive techniques), "Premium Prompt Library" (tabbed examples with CTA), "✨ Try a Premium Prompt ✨" (LLM-powered prompt generator), and "Market & Strategy" (visualized business case). The "Join Waitlist" buttons now direct users to a dedicated /waitlist page for systematic information gathering. -->
-    <!-- Visualization & Content Choices: Report Info: Market Growth -> Goal: Show change -> Viz: Bar Chart (Chart.js) for clear trend visualization. Report Info: Premium Prompt Checklist -> Goal: Compare/Inform -> Method: Interactive HTML list, where clicking reveals details, making it more engaging than a static table. Report Info: Advanced Techniques -> Goal: Organize/Inform -> Method: Two-panel layout with a clickable menu, allowing focused exploration of each technique. Report Info: Prompt Examples -> Goal: Inform/Organize -> Method: Tabbed interface to cleanly present large code/text blocks without clutter. New Feature: Prompt Generation -> Goal: Demonstrate value -> Method: Text input + LLM call + text output. All choices adhere to the NO SVG/Mermaid rule and support the non-linear application structure. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #F8F7F4;
             color: #1a202c;
         }
-        .active-nav {
-            color: #3B82F6;
-            font-weight: 600;
-        }
+        /* Styles for the dynamically loaded header/footer components */
         .nav-link {
             transition: color 0.3s ease;
         }
         .nav-link:hover {
+            color: #EBF8FF; /* Light blue on hover for dark header */
+        }
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 32, 44, 0.95); /* Dark overlay */
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-menu-overlay.open {
+            transform: translateX(0);
+        }
+        .mobile-menu-overlay a {
+            font-size: 1.8rem;
+            color: white;
+            padding: 1rem 0;
+            transition: color 0.2s ease;
+        }
+        .mobile-menu-overlay a:hover {
+            color: #3B82F6;
+        }
+        .close-button {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+        }
+        /* Styles specific to this page content */
+        .active-nav-product { /* Specific to this page's sub-nav */
+            color: #3B82F6;
+            font-weight: 600;
+        }
+        .nav-link-product { /* Specific to this page's sub-nav */
+            transition: color 0.3s ease;
+        }
+        .nav-link-product:hover { /* Specific to this page's sub-nav */
             color: #3B82F6;
         }
         .active-tab {
@@ -107,188 +146,217 @@
             background-color: #DBEAFE; /* Blue-100 */
             color: #2563EB;
         }
+        /* Hide content until header/footer are loaded to prevent FOUC */
+        #page-content {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #page-content.loaded {
+            opacity: 1;
+        }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-remote-config-compat.js"></script>
 </head>
 <body class="antialiased">
+    <div id="header-placeholder"></div>
 
-    <!-- Global Header -->
-    <header class="bg-gray-800 text-white sticky top-0 z-50 shadow-md">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="https://aimethods.co" class="text-2xl font-bold text-white hover:text-gray-300 transition-colors">AiMethods</a>
-            <div class="hidden md:flex space-x-8">
-                <a href="https://aimethods.co/home" class="text-white hover:text-gray-300 transition-colors">Home</a>
-                <a href="https://aimethods.co/products" class="text-white hover:text-gray-300 transition-colors">Products</a>
-                <a href="https://aimethods.co/solutions" class="text-white hover:text-gray-300 transition-colors">Solutions</a>
-                <a href="https://aimethods.co/about" class="text-white hover:text-gray-300 transition-colors">About Us</a>
-                <a href="https://aimethods.co/contact" class="text-white hover:text-gray-300 transition-colors">Contact</a>
-            </div>
-        </nav>
-    </header>
+    <div id="page-content">
+        <main>
+            <nav class="bg-white/80 backdrop-blur-md sticky top-[68px] z-40 shadow-sm border-b border-gray-200">
+                <div class="container mx-auto px-6 py-3 flex justify-center md:justify-start space-x-6 md:space-x-8 text-gray-700">
+                    <a href="#hero" class="nav-link-product font-semibold text-blue-600">Prompts Overview</a>
+                    <a href="#value" class="nav-link-product">Value</a>
+                    <a href="#toolkit" class="nav-link-product">Toolkit</a>
+                    <a href="#library" class="nav-link-product">Library</a>
+                    <a href="#sparkle-prompt" class="nav-link-product">Sparkle Prompt</a>
+                    <a href="#strategy" class="nav-link-product">Strategy</a>
+                </div>
+            </nav>
 
-    <!-- Product-Specific Navigation -->
-    <nav class="bg-white/80 backdrop-blur-md sticky top-[68px] z-40 shadow-sm border-b border-gray-200">
-        <div class="container mx-auto px-6 py-3 flex justify-center md:justify-start space-x-6 md:space-x-8 text-gray-700">
-            <a href="#hero" class="nav-link font-semibold text-blue-600">Prompts Overview</a>
-            <a href="#value" class="nav-link">Value</a>
-            <a href="#toolkit" class="nav-link">Toolkit</a>
-            <a href="#library" class="nav-link">Library</a>
-            <a href="#sparkle-prompt" class="nav-link">Sparkle Prompt</a>
-            <a href="#strategy" class="nav-link">Strategy</a>
-        </div>
-    </nav>
-
-    <main>
-        <section id="hero" class="py-20 md:py-32 text-center bg-white">
-            <div class="container mx-auto px-6">
-                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">Architecting Your Premium AI Prompts</h1>
-                <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">This is a preview of our premium, expert-crafted AI prompts. Moving beyond simple queries, our specialized prompt packages engineer high-value instructions that deliver unparalleled results for analysts, creators, and builders.</p>
-                <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="../waitlist/waitlist.html" class="cta-button cta-button-primary">Join Our Waitlist</a>
-                    <!-- <a href="https://aimethods.co/contact-form" target="_blank" class="cta-button cta-button-secondary">Learn More</a> -->
-                </div>
-                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
-                        <p class="text-3xl font-bold text-blue-600" id="market-size-stat">$6,533.87B</p>
-                        <p class="mt-2 text-gray-600">Projected Prompt Engineering Market by 2034</p>
+            <section id="hero" class="py-20 md:py-32 text-center bg-white">
+                <div class="container mx-auto px-6">
+                    <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">Architecting Your Premium AI Prompts</h1>
+                    <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">This is a preview of our premium, expert-crafted AI prompts. Moving beyond simple queries, our specialized prompt packages engineer high-value instructions that deliver unparalleled results for analysts, creators, and builders.</p>
+                    <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                        <a href="../waitlist/" class="cta-button cta-button-primary">Join Our Waitlist</a>
+                        <a href="https://aimethods.co/contact/" class="cta-button cta-button-secondary">Learn More</a>
                     </div>
-                    <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
-                        <p class="text-3xl font-bold text-blue-600" id="cagr-stat">32.90%</p>
-                        <p class="mt-2 text-gray-600">Compound Annual Growth Rate (CAGR)</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="value" class="py-20 bg-gray-50">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Anatomy of a Premium Prompt</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">A premium prompt is not just an instruction; it's a meticulously engineered solution. It justifies its value by automating complex tasks, reducing errors, and delivering expert-level insights that save significant time and resources. Click each criterion to see how.</p>
-                </div>
-                <div id="value-checklist" class="max-w-4xl mx-auto space-y-4">
-                </div>
-            </div>
-        </section>
-
-        <section id="toolkit" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Prompt Architect's Toolkit</h2>
-                     <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Expert-level prompts are built using a combination of foundational principles and advanced techniques. This toolkit allows you to explore the methods that transform a simple query into a powerful, precise instruction for an AI model.</p>
-                </div>
-                <div class="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto bg-gray-50 p-4 rounded-lg shadow-md">
-                    <div id="tech-nav" class="md:w-1/3 flex-shrink-0 space-y-2">
-                    </div>
-                    <div id="tech-content" class="md:w-2/3 bg-white p-6 rounded-lg min-h-[300px]">
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="library" class="py-20 bg-gray-50">
-            <div class="container mx-auto px-6">
-                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Premium Prompt Library</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Explore concrete examples of premium prompts designed for specific, high-value use cases. Each prompt applies the advanced techniques from the toolkit to automate complex professional tasks, showcasing the tangible output of expert prompt engineering.</p>
-                </div>
-                <div class="max-w-5xl mx-auto">
-                    <div id="prompt-tabs" class="flex flex-wrap justify-center border-b border-gray-200 mb-8">
-                    </div>
-                    <div id="prompt-content-area" class="bg-white p-6 rounded-lg shadow-md">
-                    </div>
-                </div>
-                <div class="mt-12 text-center">
-                    <p class="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">Ready to unlock the full power of AI for your specific needs? Join our waitlist to be notified about pricing and package options for our full range of premium prompt packages!</p>
-                    <a href="https://aimethods.co/waitlist" class="cta-button cta-button-primary">Join the Waitlist Today!</a>
-                </div>
-            </div>
-        </section>
-
-        <section id="sparkle-prompt" class="py-20 bg-white">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">✨ Try a Premium Prompt ✨</h2>
-                <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">See the power of a meticulously crafted prompt! Enter a basic idea, and our AI will transform it into a professional, high-value prompt using the techniques outlined in our toolkit.</p>
-                <div class="max-w-3xl mx-auto bg-gray-50 p-6 rounded-lg shadow-md">
-                    <textarea id="basicPromptInput" class="w-full p-4 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 resize-y min-h-[120px] text-gray-700" placeholder="e.g., Write a marketing email for a new software feature called 'AI Methods Pro'."></textarea>
-                    <button id="generateSparklePrompt" class="cta-button cta-button-primary w-full md:w-auto">Generate Premium Prompt</button>
-                    <div id="sparklePromptOutput" class="mt-6 text-left">
-                        <div id="loadingIndicator" class="hidden text-center text-blue-600 font-semibold">Generating your premium prompt...</div>
-                        <pre id="generatedPromptDisplay" class="code-block whitespace-pre-wrap hidden"></pre>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="strategy" class="py-20 bg-gray-50">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Market Opportunity & Strategy</h2>
-                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">The demand for specialized AI solutions is growing exponentially. This section outlines the market landscape and strategic approach for commercializing a premium prompt library, from productization to ensuring long-term value through continuous maintenance.</p>
-                </div>
-                <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div class="chart-container">
-                        <canvas id="marketChart"></canvas>
-                    </div>
-                    <div class="space-y-6">
-                        <div>
-                            <h3 class="text-xl font-semibold mb-2 text-gray-700">Packaging & Pricing</h3>
-                            <p class="text-gray-600">Beyond individual sales, curated bundles and subscription models offer continuous value, providing users with a library that evolves alongside AI technology itself. This ensures prompts remain effective and justifies recurring revenue.</p>
+                    <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                            <p class="text-3xl font-bold text-blue-600" id="market-size-stat">$6,533.87B</p>
+                            <p class="mt-2 text-gray-600">Projected Prompt Engineering Market by 2034</p>
                         </div>
-                        <div>
-                            <h3 class="text-xl font-semibold mb-2 text-gray-700">Marketing & Positioning</h3>
-                            <p class="text-gray-600">Focus on tangible benefits: time saved, errors eliminated, and access to virtual expertise. Case studies and educational content will demonstrate the clear ROI to a professional audience of analysts, creators, and builders.</p>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-semibold mb-2 text-gray-700">Scalability & Maintenance</h3>
-                            <p class="text-gray-600">Success hinges on a robust framework of versioning, documentation, and automated testing. Continuous adaptation to new LLM versions is not just maintenance—it's a core feature of the premium value proposition.</p>
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                            <p class="text-3xl font-bold text-blue-600" id="cagr-stat">32.90%</p>
+                            <p class="mt-2 text-gray-600">Compound Annual Growth Rate (CAGR)</p>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-    </main>
+            <section id="value" class="py-20 bg-gray-50">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Anatomy of a Premium Prompt</h2>
+                        <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">A premium prompt is not just an instruction; it's a meticulously engineered solution. It justifies its value by automating complex tasks, reducing errors, and delivering expert-level insights that save significant time and resources. Click each criterion to see how.</p>
+                    </div>
+                    <div id="value-checklist" class="max-w-4xl mx-auto space-y-4">
+                    </div>
+                </div>
+            </section>
 
-    <!-- Global Footer -->
-    <footer class="bg-gray-800 text-gray-300 py-12">
-        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-                <h3 class="text-xl font-bold text-white mb-4">AIMethods.co</h3>
-                <p class="text-sm">Empowering professionals with indispensable AI tools and expert-crafted prompts to elevate their work.</p>
-            </div>
-            <div>
-                <h4 class="font-semibold text-white mb-4">Products</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="https://aimethods.co/prompts" class="hover:text-white transition-colors">Premium Prompts</a></li>
-                    <li><a href="https://aimethods.co/custom-solutions" class="hover:text-white transition-colors">Custom AI Solutions</a></li>
-                    <li><a href="https://aimethods.co/training" class="hover:text-white transition-colors">AI Training</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-semibold text-white mb-4">Resources</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="https://aimethods.co/blog" class="hover:text-white transition-colors">Blog</a></li>
-                    <li><a href="https://aimethods.co/case-studies" class="hover:text-white transition-colors">Case Studies</a></li>
-                    <li><a href="https://aimethods.co/faq" class="hover:text-white transition-colors">FAQ</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-semibold text-white mb-4">Company</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="https://aimethods.co/about" class="hover:text-white transition-colors">About Us</a></li>
-                    <li><a href="https://aimethods.co/contact" class="hover:text-white transition-colors">Contact</a></li>
-                    <li><a href="https://aimethods.co/privacy" class="hover:text-white transition-colors">Privacy Policy</a></li>
-                    <li><a href="https://aimethods.co/terms" class="hover:text-white transition-colors">Terms of Service</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="container mx-auto px-6 mt-8 border-t border-gray-700 pt-8 text-center text-sm">
-            &copy; 2025 AIMethods.co. All rights reserved.
-        </div>
-    </footer>
+            <section id="toolkit" class="py-20 bg-white">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Prompt Architect's Toolkit</h2>
+                         <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Expert-level prompts are built using a combination of foundational principles and advanced techniques. This toolkit allows you to explore the methods that transform a simple query into a powerful, precise instruction for an AI model.</p>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto bg-gray-50 p-4 rounded-lg shadow-md">
+                        <div id="tech-nav" class="md:w-1/3 flex-shrink-0 space-y-2">
+                        </div>
+                        <div id="tech-content" class="md:w-2/3 bg-white p-6 rounded-lg min-h-[300px]">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="library" class="py-20 bg-gray-50">
+                <div class="container mx-auto px-6">
+                     <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Premium Prompt Library</h2>
+                        <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Explore concrete examples of premium prompts designed for specific, high-value use cases. Each prompt applies the advanced techniques from the toolkit to automate complex professional tasks, showcasing the tangible output of expert prompt engineering.</p>
+                    </div>
+                    <div class="max-w-5xl mx-auto">
+                        <div id="prompt-tabs" class="flex flex-wrap justify-center border-b border-gray-200 mb-8">
+                        </div>
+                        <div id="prompt-content-area" class="bg-white p-6 rounded-lg shadow-md">
+                        </div>
+                    </div>
+                    <div class="mt-12 text-center">
+                        <p class="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">Ready to unlock the full power of AI for your specific needs? Join our waitlist to be notified about pricing and package options for our full range of premium prompt packages!</p>
+                        <a href="../waitlist/" class="cta-button cta-button-primary">Join the Waitlist Today!</a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sparkle-prompt" class="py-20 bg-white">
+                <div class="container mx-auto px-6 text-center">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">✨ Try a Premium Prompt ✨</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">See the power of a meticulously crafted prompt! Enter a basic idea, and our AI will transform it into a professional, high-value prompt using the techniques outlined in our toolkit.</p>
+                    <div class="max-w-3xl mx-auto bg-gray-50 p-6 rounded-lg shadow-md">
+                        <textarea id="basicPromptInput" class="w-full p-4 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4 resize-y min-h-[120px] text-gray-700" placeholder="e.g., Write a marketing email for a new software feature called 'AI Methods Pro'."></textarea>
+                        <button id="generateSparklePrompt" class="cta-button cta-button-primary w-full md:w-auto">Generate Premium Prompt</button>
+                        <div id="sparklePromptOutput" class="mt-6 text-left">
+                            <div id="loadingIndicator" class="hidden text-center text-blue-600 font-semibold">Generating your premium prompt...</div>
+                            <pre id="generatedPromptDisplay" class="code-block whitespace-pre-wrap hidden"></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="strategy" class="py-20 bg-gray-50">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Market Opportunity & Strategy</h2>
+                        <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">The demand for specialized AI solutions is growing exponentially. This section outlines the market landscape and strategic approach for commercializing a premium prompt library, from productization to ensuring long-term value through continuous maintenance.</p>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="chart-container">
+                            <canvas id="marketChart"></canvas>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2 text-gray-700">Packaging & Pricing</h3>
+                                <p class="text-gray-600">Beyond individual sales, curated bundles and subscription models offer continuous value, providing users with a library that evolves alongside AI technology itself. This ensures prompts remain effective and justifies recurring revenue.</p>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2 text-gray-700">Marketing & Positioning</h3>
+                                <p class="text-gray-600">Focus on tangible benefits: time saved, errors eliminated, and access to virtual expertise. Case studies and educational content will demonstrate the clear ROI to a professional audience of analysts, creators, and builders.</p>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2 text-gray-700">Scalability & Maintenance</h3>
+                                <p class="text-gray-600">Success hinges on a robust framework of versioning, documentation, and automated testing. Continuous adaptation to new LLM versions is not just maintenance—it's a core feature of the premium value proposition.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    
+    <div id="footer-placeholder"></div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCbNQcNzFObrnzAuBqFUFFOTA6RdaSFw6o", // Replace with your actual Firebase Web API Key
+      authDomain: "aimethods-e8521.firebaseapp.com",
+      projectId: "aimethods-e8521",
+      storageBucket: "aimethods-e8521.firebasestorage.app",
+      messagingSenderId: "1093809088702",
+      appId: "1:1093809088702:web:e893ba5362145e094196ef",
+      measurementId: "G-0LQHEBJ892" // Optional, remove if not using Analytics
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const remoteConfig = firebase.remoteConfig();
+
+    // Enable developer mode for faster fetching during development (remove for production)
+    remoteConfig.settings.minimumFetchIntervalMillis = 10000; // 10 seconds
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Function to load and inject HTML content
+        async function loadComponent(placeholderId, filePath) {
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const html = await response.text();
+                document.getElementById(placeholderId).innerHTML = html;
+            } catch (error) {
+                console.error(`Could not load ${filePath}:`, error);
+                document.getElementById(placeholderId).innerHTML = `<div class="text-red-500 text-center p-4">Error loading ${filePath}.</div>`;
+            }
+        }
+
+        // Load header and footer (relative to prompts/index.html is ../headerfooter/)
+        await loadComponent('header-placeholder', '../headerfooter/header.html');
+        await loadComponent('footer-placeholder', '../headerfooter/footer.html');
+
+        // Initialize Mobile Menu (as this JS is now loaded after header content)
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const closeMobileMenu = document.getElementById('close-mobile-menu');
+
+        if (mobileMenuButton && mobileMenuOverlay && closeMobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenuOverlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            });
+
+            closeMobileMenu.addEventListener('click', () => {
+                mobileMenuOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+
+            mobileMenuOverlay.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenuOverlay.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+            });
+        } else {
+            console.warn("Mobile menu elements not found after header injection. Check header.html content.");
+        }
+        
+        // Show content after header/footer are loaded
+        document.getElementById('page-content').classList.add('loaded');
+
 
         const checklistData = [
             { criterion: 'Complexity Handled', description: 'Automates tasks that typically demand expert human analysis, saving significant time and specialized labor costs.', techniques: ['Chain-of-Thought', 'Task Decomposition', 'Tree-of-Thought', 'ReAct'] },
@@ -662,7 +730,7 @@ Incorporate elements like:
                     body: JSON.stringify(payload)
                 });
 
-                const result = await response.json();
+                const result = await response.json(); // Await the JSON parsing
                 
                 if (result.candidates && result.candidates.length > 0 &&
                     result.candidates[0].content && result.candidates[0].content.parts &&

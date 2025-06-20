@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Calm Neutral Tech -->
-    <!-- Application Structure Plan: This is the main site homepage (index.html). It now dynamically loads header and footer content using JavaScript injection for modularity. The content flow includes: a compelling hero section introducing AiMethods, a focused section highlighting Premium Prompts, an LLM-powered "Find Your AI Advantage" section, and calls to action to navigate. -->
-    <!-- Visualization & Content Choices: Uses simple HTML and Tailwind. Textual content dominates, with strategic use of buttons. LLM feature (text input -> Gemini API call -> text output) for personalized workflow suggestions. -->
+    <!-- Application Structure Plan: This is the main site homepage (index.html). It now dynamically loads header and footer content using JavaScript injection for modularity. The content flow includes: a compelling hero section introducing AiMethods, a focused section highlighting Premium Prompts, an LLM-powered "Find Your AI Advantage" section, and calls to action to navigate. LLM feature now securely calls Firebase Remote Config for API key. -->
+    <!-- Visualization & Content Choices: Uses simple HTML and Tailwind. Textual content dominates, with strategic use of buttons. LLM feature (text input -> Firebase Remote Config for API Key -> direct Gemini API call -> text output) for personalized workflow suggestions. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -95,6 +95,9 @@
             opacity: 1;
         }
     </style>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-remote-config-compat.js"></script>
 </head>
 <body class="antialiased">
     <div id="header-placeholder"></div>
@@ -108,7 +111,7 @@
                     <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">Unlock the full potential of Generative AI for your business with expertly crafted prompts, custom solutions, and strategic insights. Transform complex challenges into intelligent, automated workflows.</p>
                     <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
                         <a href="./prompts/" class="cta-button cta-button-primary">Explore Premium Prompts</a>
-                        <a href="./headerfooter/comingsoon.html" class="cta-button cta-button-secondary">Get Custom Solutions</a>
+                        <a href="./contact/" class="cta-button cta-button-secondary">Get Custom Solutions</a>
                     </div>
                 </div>
             </section>
@@ -131,13 +134,13 @@
                             <div class="text-5xl mb-4">⚙️</div>
                             <h3 class="text-xl font-semibold text-gray-800 mb-2">Custom AI Solutions</h3>
                             <p class="text-gray-600 mb-4">Tailored AI integration and workflow automation services to address your unique business challenges with precision and efficiency.</p>
-                            <a href="./headerfooter/comingsoon.html" class="text-blue-600 font-medium hover:underline">Discover Solutions &rarr;</a>
+                            <a href="./solutions/" class="text-blue-600 font-medium hover:underline">Discover Solutions &rarr;</a>
                         </div>
                         <div class="bg-white p-6 rounded-lg shadow-md text-center">
                             <div class="text-5xl mb-4">📚</div>
                             <h3 class="text-xl font-semibold text-gray-800 mb-2">AI Training & Consulting</h3>
                             <p class="text-gray-600 mb-4">Expert-led training and strategic consulting to help your team master AI tools and integrate them effectively into your operations.</p>
-                            <a href="./headerfooter/comingsoon.html" class="text-blue-600 font-medium hover:underline">Explore Training &rarr;</a>
+                            <a href="./training/" class="text-blue-600 font-medium hover:underline">Explore Training &rarr;</a>
                         </div>
                     </div>
                 </div>
@@ -174,6 +177,27 @@
     <div id="footer-placeholder"></div>
 
     <script>
+        // REPLACE WITH YOUR ACTUAL FIREBASE CONFIGURATION OBJECT
+        // This object comes from your Firebase project settings -> "Add app" -> web app setup.
+        const firebaseConfig = {
+               apiKey: "AIzaSyCbNQcNzFObrnzAuBqFUFFOTA6RdaSFw6o",
+    authDomain: "aimethods-e8521.firebaseapp.com",
+    projectId: "aimethods-e8521",
+    storageBucket: "aimethods-e8521.firebasestorage.app",
+    messagingSenderId: "1093809088702",
+    appId: "1:1093809088702:web:e893ba5362145e094196ef",
+    measurementId: "G-0LQHEBJ892"
+        };
+  // Import the functions you need from the SDKs you need
+
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const remoteConfig = firebase.remoteConfig();
+
+        // Enable developer mode for faster fetching during development (remove for production)
+        remoteConfig.settings.minimumFetchIntervalMillis = 10000; // 10 seconds
+
         document.addEventListener('DOMContentLoaded', async () => {
             // Function to load and inject HTML content
             async function loadComponent(placeholderId, filePath) {
@@ -195,7 +219,6 @@
             await loadComponent('footer-placeholder', './headerfooter/footer.html');
 
             // Initialize Mobile Menu (as this JS is now loaded after header content)
-            // This entire block runs AFTER header.html is injected
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
             const closeMobileMenu = document.getElementById('close-mobile-menu');
@@ -231,13 +254,36 @@
             const advantageLoading = document.getElementById('advantageLoading');
             const advantageDisplay = document.getElementById('advantageDisplay');
 
+            let geminiApiKey = null; // Variable to store fetched API key
+
+            // Fetch API key from Firebase Remote Config
+            try {
+                await remoteConfig.fetchAndActivate();
+                geminiApiKey = remoteConfig.getString('GEMINI_API_KEY');
+                console.log("Gemini API Key fetched successfully:", geminiApiKey ? "******" + geminiApiKey.slice(-5) : "Not found");
+            } catch (error) {
+                console.error("Error fetching Remote Config key:", error);
+                advantageDisplay.textContent = 'Error loading AI capabilities. Please try again later.';
+                advantageDisplay.classList.remove('hidden');
+                advantageDisplay.style.color = '#DC2626';
+                advantageLoading.classList.add('hidden');
+                generateAdvantage.disabled = true; // Disable button if key fails to load
+            }
+
             if (advantageInput && generateAdvantage) { // Ensure elements exist before adding listener
                 generateAdvantage.addEventListener('click', async () => {
+                    if (!geminiApiKey) {
+                        advantageDisplay.textContent = 'AI capabilities not initialized. Please refresh the page.';
+                        advantageDisplay.classList.remove('hidden');
+                        advantageDisplay.style.color = '#DC2626';
+                        return;
+                    }
+
                     const userInput = advantageInput.value.trim();
                     if (!userInput) {
                         advantageDisplay.textContent = 'Please describe your role or a challenge to get AI workflow suggestions.';
                         advantageDisplay.classList.remove('hidden');
-                        advantageDisplay.style.color = '#DC2626'; // Red for error
+                        advantageDisplay.style.color = '#DC2626';
                         return;
                     }
 
@@ -247,17 +293,17 @@
                     advantageDisplay.textContent = ''; // Clear previous output
 
                     try {
-                        const prompt = `Based on the user's input, provide brief, direct suggestions (3-5 bullet points) on how AiMethods (premium AI prompts and custom solutions) can help. Each point should be a concise paragraph, avoiding markdown characters (*, #).
+                        const prompt = `As an expert in AI workflow optimization for businesses, analyze the following user input describing their role or a business challenge. Suggest brief, direct suggestions (3-5 concise paragraphs or bullet points) on how AiMethods (premium AI prompts and custom solutions) can help them, focusing on practical AI applications and benefits. Avoid markdown characters (*, #) in the output.
 
 User Input: "${userInput}"
 
-How AiMethods can help:`;
+Suggestions:`;
 
                         let chatHistory = [];
                         chatHistory.push({ role: "user", parts: [{ text: prompt }] });
                         const payload = { contents: chatHistory };
-                        const apiKey = "AIzaSyAHwM7bzmfVJwfRuSdDTxt2tDnz1BmzlkA"; // IMPORTANT: REPLACE THIS with your actual Gemini API key for deployment!
-                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                        // Use the fetched API key
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
 
                         const response = await fetch(apiUrl, {
                             method: 'POST',
