@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AiMethods: Premium AI Prompts</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon_16_transparent.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon_32_transparent.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -155,6 +157,9 @@
         #page-content.loaded {
             opacity: 1;
         }
+        .centerflex{
+            justify-content: center !important;
+        }
     </style>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
@@ -167,8 +172,8 @@
     <div id="page-content">
         <main>
             <!-- Product-Specific Navigation for Prompts SPA (relative paths corrected) -->
-            <nav class="bg-white/80 backdrop-blur-md sticky top-[68px] z-40 shadow-sm border-b border-gray-200">
-                <div class="container mx-auto px-6 py-3 flex justify-center md:justify-start space-x-6 md:space-x-8 text-gray-700">
+            <nav class="bg-white/80 backdrop-blur-md top-[68px] z-40 shadow-sm border-b border-gray-200">
+                <div class="container mx-auto px-6 py-3 flex centerflex justify-center md:justify-start space-x-6 md:space-x-8 text-gray-700">
                     <a href="#hero" class="nav-link-product font-semibold text-blue-600">Prompts Overview</a>
                     <a href="#value" class="nav-link-product">Value</a>
                     <a href="#toolkit" class="nav-link-product">Toolkit</a>
@@ -328,8 +333,8 @@
         }
 
         // Load header and footer (relative to prompts/index.html is ../headerfooter/)
-        await loadComponent('header-placeholder', '../headerfooter/header.html');
-        await loadComponent('footer-placeholder', '../headerfooter/footer.html');
+        await loadComponent('header-placeholder', '../header/index.html');
+        await loadComponent('footer-placeholder', '../footer/index.html');
 
         // Initialize Mobile Menu (as this JS is now loaded after header content)
         const mobileMenuButton = document.getElementById('mobile-menu-button');
